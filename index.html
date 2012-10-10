@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Conmio JavaScript task</title>
+        <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css" />
+        <script src="js/algorithm.js" type="text/javascript" ></script>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>Bilateral projects</h1>
+            </header>
+            <section id="description">
+                <p>A friend of yours works at an undisclosed company in the mobile industry, and needs your                help. The company has offices in Helsinki and New York, and collaboration between the two offices is                extensive. The situation is that each of the many but small projects is handled by a two-person team                with a member in each city. While emails, faxes, and phones are wonderful, and work well within each                team, the CEO wants a briefing every year on the projects. For this purpose the CEO invites                representatives from the projects to Barbados for a week of beach fun presentations of all the projects.                However, money is tight and a new policy has been created: the CEO wants at least one person from                each project, and additionally, she wants to invite as few people as possible.</p>
+                
+                <p>This is where you come in. In order to help your friend get a ticket to Barbados, you are to write a program that, 
+                given all the two-person teams, computes the smallest number of people that must be invited in order to get at least one                person from each project, as well as a list of people to invite. If possible (subject to the set of people                being smallest possible), the list of invitees should include your friend.</p>
+            </section>
+            <section id="input">
+                <h2>Input</h2>
+                <p>Sample of the data can be found in the <strong>/data</strong> folder. The file contains a list of strings, where                each string contain two integers, i, j separated by a space. The integers represent the employee IDs of the two employees in                that team (the first one is from Helsinki and the second one is from New York). Helsinki employees                have IDs in the range 1000 to 1999 and New York employees have IDs in the range 2000 to 2999. An                employee can be a member of several teams, but there cannot be several teams consisting of the same pair of employees. Your
+                friend has ID 1009.</p>
+                
+                <p>You should use this data, assuming that a different file with the same format will be replaced when your entry is being 
+                judged, and the program should work without modifications. Also, you are to assume that the files will be placed on a static web server.
+                Place the core of your algorithm in <strong>/js/algorithm.js</strong>.</p>
+                
+                <div class="row">
+                    <div class="span8">
+                        <p>Pressing this button should run your code, and the results should be gathered in the &lt;ul&gt; element <strong>#selectees</strong></p>
+                    </div>
+                    <div class="span4">
+                        <button class="btn-large btn-primary" id="run">
+                          Run code
+                        </button>
+                    </div>
+                </div>
+                
+            </section>
+            <section id="output">
+                <div class="row">
+                    <div class="span6">
+                        <h2>Output</h2>
+                        <p>The lucky people going to Barbados are:</p>
+                        <ul id="selectees">
+                        </ul>
+                    </div>
+                    <div class="span6">
+                        <h3>Sample</h3>
+                        <p>Sample input 1</p>
+                        <ul>
+                           <li>1009 2011</li>
+                           <li>1017 2011</li>
+                        </ul>
+                        <p>Sample output 1</p>
+                        <ul>
+                           <li>2011</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </body>
+</html>
