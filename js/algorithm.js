@@ -9,39 +9,39 @@ window.onload = function() {
 // Calculate function.
 //
 function calculate(employeesJSON) {
-	
+
 	// Friend id constant.
 	var friendId = 1009;
-	
+
 	// First remove line breaks.
 	employeesJSON = employeesJSON.replace(/[\r\n]+/g, "");
-	// Then ' [   "' from the beginning.
+	// Then ' [ "' from the beginning.
 	employeesJSON = employeesJSON.replace(/^\s*\[\s*\"/, "");
-	// Then '"    ] ' from the end.
+	// Then '" ] ' from the end.
 	employeesJSON = employeesJSON.replace(/\"\s*\]\s*$/, "");
 	// Split pairs from remaining string using '" , "' as separator.
 	var pairs = employeesJSON.split(/\"\s*,\s*\"/);
-	
+
 	// Replace Helsinki or New York ids with highest
 	// participant count. Where participant count
 	// is the highest number of projects an employee
 	// is participating in.
-	for (var i = 0; i < pairs.length; ++i) {
-		
+	for ( var i = 0; i < pairs.length; ++i) {
+
 		// Get ids.
-		var helsinkiId = getHelsinkiId(pairs[i]);
-		var newYorkId = getNewYorkId(pairs[i]);
+		var helsinkiId = pairs[i].split(" ")[0];
+		var newYorkId = pairs[i].split(" ")[1];
 		// Count in how many projects person
 		// is participating in.
 		var countHelsinki = count(pairs, helsinkiId);
 		var countNewYork = count(pairs, newYorkId);
-		
+
 		// If counts are equal...
 		if (countHelsinki == countNewYork) {
 			// Prefer friendId, otherwise choose randomly
 			// either New York or Helsinki member.
 			if (helsinkiId == friendId || Math.random() > 0.5) {
-				pairs.splice(i, 1, helsinkiId);				
+				pairs.splice(i, 1, helsinkiId);
 			} else {
 				pairs.splice(i, 1, newYorkId);
 			}
@@ -54,11 +54,11 @@ function calculate(employeesJSON) {
 			pairs.splice(i, 1, newYorkId);
 		}
 	}
-	
+
 	// Remove duplicates.
-	for (var i = 0; i < pairs.length; ++i) {
+	for ( var i = 0; i < pairs.length; ++i) {
 		var id = pairs[i];
-		for (var j = i + 1; j < pairs.length; ) {
+		for ( var j = i + 1; j < pairs.length;) {
 			if (id == pairs[j]) {
 				pairs.splice(j, 1);
 			} else {
@@ -66,27 +66,13 @@ function calculate(employeesJSON) {
 			}
 		}
 	}
-	
+
 	// Output selected pairs into selectees list.
 	var outputList = "";
-	for (var i = 0; i < pairs.length; ++i) {
+	for ( var i = 0; i < pairs.length; ++i) {
 		outputList += "<li>" + pairs[i] + "</li>";
 	}
 	document.getElementById("selectees").innerHTML = outputList;
-}
-
-//
-// Returns Helsinki id for a pair variable.
-//
-function getHelsinkiId(pair) {
-	return pair.split(" ")[0];
-}
-
-//
-// Returns New York id for a pair variable.
-//
-function getNewYorkId(pair) {
-	return pair.split(" ")[1];
 }
 
 //
@@ -95,11 +81,12 @@ function getNewYorkId(pair) {
 //
 function count(pairs, id) {
 	var count = 0;
-	for (var i = 0; i < pairs.length; ++i) {
-		if (getHelsinkiId(pairs[i]) == id) {
+	for ( var i = 0; i < pairs.length; ++i) {
+		var employees = pairs[i].split(" ");
+		if (employees[0] == id) {
 			++count;
 		}
-		if (getNewYorkId(pairs[i]) == id) {
+		if (employees[1] == id) {
 			++count;
 		}
 	}
