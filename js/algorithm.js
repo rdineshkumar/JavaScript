@@ -117,19 +117,6 @@ function countIds(pairs, id) {
 }
 
 //
-// Checks if array of ids contains given id.
-//
-function contains(ids, id) {
-	// Iterate over ids array and search for given id.
-	for ( var i = 0; i < ids.length; ++i) {
-		if (ids[i] == id) {
-			return true;
-		}
-	}
-	return false;
-}
-
-//
 // Replaces a pair that contains given id with id only.
 //
 function choose(pairs, id) {
