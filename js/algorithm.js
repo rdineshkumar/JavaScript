@@ -25,14 +25,14 @@ function calculate(employeesJSON) {
 	// First create an array where your friend is chosen to Barbados and
 	// calculate how many attendees it would take.
 	var pairsWithFriend = [].concat(pairs);
-	replace(pairsWithFriend, friendId);
+	choose(pairsWithFriend, friendId);
 	findLuckyOnes(pairsWithFriend);
 
 	// Then calculate minimum travelers value from original array.
 	findLuckyOnes(pairs);
 
 	// If array containing your friend is shorter or same length as original
-	// array minimum, choose it as outout.
+	// array minimum, choose it as output.
 	if (pairsWithFriend.length <= pairs.length) {
 		pairs = pairsWithFriend;
 	}
@@ -85,8 +85,10 @@ function findLuckyOnes(pairs) {
 			}
 		}
 
+		// If maxCount greater than zero, choose random id from maximum ids
+		// array to Barbados.
 		if (maxCount > 0) {
-			replace(pairs, maxIds[Math.floor(Math.random() * maxIds.length)]);
+			choose(pairs, maxIds[Math.floor(Math.random() * maxIds.length)]);
 		}
 	}
 	// Continue while maxCount is higher than zero.
@@ -130,7 +132,7 @@ function contains(ids, id) {
 //
 // Replaces a pair that contains given id with id only.
 //
-function replace(pairs, id) {
+function choose(pairs, id) {
 	// First occurrence is replaced, latter ones are removed.
 	var replace = true;
 
