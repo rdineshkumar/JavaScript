@@ -22,11 +22,33 @@ function calculate(employeesJSON) {
 	// Split pairs from remaining string using '" , "' as separator.
 	var pairs = employeesJSON.split(/\"\s*,\s*\"/);
 
+	// First create an array where your friend is chosen to Barbados and
+	// calculate how many attendees it would take.
+	var pairsWithFriend = [].concat(pairs);
+	replace(pairsWithFriend, friendId);
+	findLuckyOnes(pairsWithFriend);
+
+	// Then calculate minimum travelers value from original array.
+	findLuckyOnes(pairs);
+
+	// If array containing your friend is shorter or same length as original
+	// array minimum, choose it as outout.
+	if (pairsWithFriend.length <= pairs.length) {
+		pairs = pairsWithFriend;
+	}
+
+	// Output selected pairs into selectees list.
+	var outputList = "";
+	for ( var i = 0; i < pairs.length; ++i) {
+		outputList += "<li>" + pairs[i] + "</li>";
+	}
+	document.getElementById("selectees").innerHTML = outputList;
+}
+
+function findLuckyOnes(pairs) {
 	// Algorithm works as follows;
 	// 1. Find ids with highest occurrence count.
-	// 2. If highest found count contains friend id, replace all pairs
-	// containing friend id with friend id only.
-	// 3. Otherwise choose random id from highest count id array and replace all
+	// 2. Choose random id from highest count id array and replace all
 	// pairs containing that id with it only.
 	do {
 		// Maximum count variable.
@@ -63,26 +85,12 @@ function calculate(employeesJSON) {
 			}
 		}
 
-		// If maxIds contains friend id, send that person to Barbados.
-		if (contains(maxIds, friendId)) {
-			replace(pairs, friendId);
-		}
-		// Otherwise if maxCount is higher than zero choose one random id from
-		// maxIds to be sent to Barbados.
-		else if (maxCount > 0) {
+		if (maxCount > 0) {
 			replace(pairs, maxIds[Math.floor(Math.random() * maxIds.length)]);
 		}
-
 	}
 	// Continue while maxCount is higher than zero.
 	while (maxCount > 0);
-
-	// Output selected pairs into selectees list.
-	var outputList = "";
-	for ( var i = 0; i < pairs.length; ++i) {
-		outputList += "<li>" + pairs[i] + "</li>";
-	}
-	document.getElementById("selectees").innerHTML = outputList;
 }
 
 //
