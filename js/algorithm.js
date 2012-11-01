@@ -53,7 +53,8 @@ define(function() {
 			clearColumn(pairsMatrix, friendId - 2000);
 		}
 		// Choose lucky ones from remaining matrix.
-		var luckyOnesWithFriend = [ friendId ].concat(findLuckyOnes(pairsMatrix));
+		var luckyOnesWithFriend = [ friendId ]
+				.concat(findLuckyOnes(pairsMatrix));
 		// If list containing friend is shorter or same length..
 		if (luckyOnesWithFriend.length <= luckyOnes.length) {
 			luckyOnes = luckyOnesWithFriend;
@@ -120,7 +121,7 @@ define(function() {
 
 			// Calculate number of intersections.
 			var maximumIntersections = 0;
-			for ( var i = 0; i < maximumArray.length; ) {
+			for ( var i = 0; i < maximumArray.length;) {
 				var intersections = 0;
 				for ( var j = 0; j < maximumArray.length; ++j) {
 					if (maximumArray[i] < 2000 && maximumArray[j] >= 2000) {
@@ -139,8 +140,9 @@ define(function() {
 					}
 				}
 				if (intersections > maximumIntersections) {
-					maximumArray.splice(0, i + 1);
+					maximumArray.splice(0, i);
 					maximumIntersections = intersections;
+					i = 1;
 				} else if (intersections == maximumIntersections) {
 					++i;
 				} else {
