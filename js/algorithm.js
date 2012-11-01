@@ -7,25 +7,16 @@ define(function() {
 
 	// Hook into run button.
 	document.getElementById("run").onclick = function() {
-		loadJSON(JSONPath);
+		loadPairs(JSONPath);
 	};
 
 	//
 	// Calculate function.
 	//
-	function calculate(employeesJSON) {
-
-		// First remove line breaks.
-		employeesJSON = employeesJSON.replace(/[\r\n]+/g, "");
-		// Then ' [ "' from the beginning.
-		employeesJSON = employeesJSON.replace(/^\s*\[\s*\"/, "");
-		// Then '" ] ' from the end.
-		employeesJSON = employeesJSON.replace(/\"\s*\]\s*$/, "");
-		// Split pairs from remaining string using '" , "' as separator.
-		var pairs = employeesJSON.split(/\"\s*,\s*\"/);
+	function calculate(pairsArray) {
 
 		// For testing purposes.
-		// pairs = generateRandomPairs(10, 10);
+		// pairsArray = generateRandomPairs(10000, 999);
 
 		// Instantiate 1001 x 1001 matrix.
 		var pairsMatrix = new Array(1001);
@@ -37,8 +28,8 @@ define(function() {
 		}
 
 		// Fill in matrix values.
-		for ( var i = 0; i < pairs.length; ++i) {
-			var pair = pairs[i].split(" ");
+		for ( var i = 0; i < pairsArray.length; ++i) {
+			var pair = pairsArray[i].split(" ");
 			pairsMatrix[pair[0] - 1000][pair[1] - 2000] = 1;
 			++pairsMatrix[pair[0] - 1000][1000];
 			++pairsMatrix[1000][pair[1] - 2000];
@@ -233,18 +224,18 @@ define(function() {
 	}
 
 	//
-	// Loads employees JSON file and calls calculate -function
+	// Loads employee pairs JSON file and calls calculate -function
 	// with its contents.
 	//
-	function loadJSON(path) {
+	function loadPairs(pathJSON) {
 		// IE7+, FF, Chrome, Opera, Safari
 		var client = new XMLHttpRequest();
 		client.onreadystatechange = function() {
 			if (client.readyState == 4 && client.status == 200) {
-				calculate(client.responseText);
+				calculate(JSON.parse(client.responseText));
 			}
 		}
-		client.open("GET", path, true);
+		client.open("GET", pathJSON, true);
 		client.setRequestHeader("Pragma", "no-cache");
 		client.send();
 	}
