@@ -23,27 +23,38 @@ define(function() {
 		employeesJSON = employeesJSON.replace(/\"\s*\]\s*$/, "");
 		// Split pairs from remaining string using '" , "' as separator.
 		var pairs = employeesJSON.split(/\"\s*,\s*\"/);
-		// Generate dictionary into which we gather all pairs working together.
-		var countDict = {};
-		for ( var i = 0; i < pairs.length; ++i) {
-			var pair = pairs[i].split(" ");
-			for ( var j = 0; j < 2; ++j) {
-				if (countDict[pair[j]] == null) {
-					countDict[pair[j]] = [];
-				}
-				countDict[pair[j]].push(pair[1 - j]);
+
+		// For testing purposes.
+		// pairs = generateRandomPairs(10, 10);
+
+		// Instantiate 1001 x 1001 matrix.
+		var pairsMatrix = new Array(1001);
+		for ( var i = 0; i < 1001; ++i) {
+			pairsMatrix[i] = new Array(1001);
+			for ( var j = 0; j < 1001; ++j) {
+				pairsMatrix[i][j] = 0;
 			}
 		}
 
-		// First calculate minimum travelers value from original dictionary.
-		var luckyOnes = findLuckyOnes(countDict, []);
+		// Fill in matrix values.
+		for ( var i = 0; i < pairs.length; ++i) {
+			var pair = pairs[i].split(" ");
+			pairsMatrix[pair[0] - 1000][pair[1] - 2000] = 1;
+			++pairsMatrix[pair[0] - 1000][1000];
+			++pairsMatrix[1000][pair[1] - 2000];
+		}
 
-		// Then create an array where your friend is chosen to Barbados and
-		// calculate how many attendees it would take.
-		var luckyOnesWithFriend = findLuckyOnes(countDict, [ friendId ]);
-
-		// If array containing your friend is shorter or same length as original
-		// array minimum, choose it as output.
+		// Choose lucky ones from full list.
+		var luckyOnes = findLuckyOnes(copyMatrix(pairsMatrix));
+		// Remove friend from project matrix.
+		if (friendId < 2000) {
+			clearRow(pairsMatrix, friendId - 1000);
+		} else {
+			clearColumn(pairsMatrix, friendId - 2000);
+		}
+		// Choose lucky ones from remaining matrix.
+		var luckyOnesWithFriend = [ friendId ].concat(findLuckyOnes(pairsMatrix));
+		// If list containing friend is shorter or same length..
 		if (luckyOnesWithFriend.length <= luckyOnes.length) {
 			luckyOnes = luckyOnesWithFriend;
 		}
@@ -57,101 +68,166 @@ define(function() {
 	}
 
 	//
-	// Choose employees to go to Barbados from pairs array.
+	// Generates random pair array.
 	//
-	function findLuckyOnes(dict, luckyOnes) {
-
-		// Generate array from dictionary. 'id' is employee id and 'partners' is
-		// an array of employees the person works with.
-		var countArray = [];
-		for (key in dict) {
-			countArray.push({
-				id : key,
-				partners : [].concat(dict[key])
-			});
-		}
-
-		// Remove already chosen employees from countArray.
-		for ( var i = 0; i < luckyOnes.length; ++i) {
-			removeAndDecrease(countArray, luckyOnes[i]);
-		}
-
-		// Algorithm works as follows;
-		// 1. Sort array plus put employees with similarly many projects into
-		// random order.
-		// 2. Choose ids with highest count and remove them from countArray.
-		while (countArray.length > 0) {
-			// Sort and randomize countArray.
-			countArray.sort(function(a, b) {
-				if (b['partners'].length == a['partners'].length) {
-					return Math.random() >= 0.5 ? 1 : -1;
-				}
-				return b['partners'].length - a['partners'].length;
-			});
-
-			// maxLength is the the first item partners count.
-			var maxLength = countArray[0]['partners'].length;
-			// maxIndex is the highest index containing maxLength partners.
-			var maxIndex = 1;
-			while (maxIndex < countArray.length) {
-				if (countArray[maxIndex]['partners'].length == maxLength) {
-					++maxIndex;
-				} else {
-					break;
-				}
-			}
-			// Iterate over all indices until maxIndex.
-			for ( var i = 0; i < maxIndex && i < countArray.length;) {
-				var employee = countArray[i];
-				// Re-check partners length as it changes during the loop.
-				if (employee['partners'].length == maxLength) {
-					// Push randIdx id to lucky ones going to Barbados.
-					luckyOnes.push(employee['id']);
-					// Remove employee with given id from countArray plus from
-					// other employee partners list.
-					removeAndDecrease(countArray, employee['id']);
-				} else {
-					++i;
-				}
+	function generateRandomPairs(count, maxId) {
+		pairs = [];
+		for ( var i = 0; i < count; ++i) {
+			var pair = Math.floor(Math.random() * maxId + 1000) + " "
+					+ Math.floor(Math.random() * maxId + 2000);
+			if (pairs.indexOf(pair) == -1) {
+				pairs.push(pair);
 			}
 		}
-
-		// Return array of lucky ones ids.
-		return luckyOnes;
+		return pairs;
 	}
 
 	//
-	// Removes employee with given id from employees list. Additionally removes
-	// it from other employees 'partner' lists too. And finally removes all
-	// employees whose partner count is zero.
+	// Creates a copy of the matrix.
 	//
-	function removeAndDecrease(employees, id) {
-		// Remove given id from employees list and from employees who got it as
-		// a partner.
-		for ( var i = 0; i < employees.length;) {
-			var employee = employees[i];
-			if (employee['id'] == id) {
-				employees.splice(i, 1);
-			} else {
-				for ( var j = 0; j < employee['partners'].length;) {
-					if (employee['partners'][j] == id) {
-						employee['partners'].splice(j, 1);
-					} else {
-						++j;
+	function copyMatrix(pairsMatrix) {
+		var matrix = new Array();
+		for ( var i = 0; i < 1001; ++i) {
+			matrix[i] = [].concat(pairsMatrix[i]);
+		}
+		return matrix;
+	}
+
+	//
+	// Actual selector algorithm function.
+	//
+	function findLuckyOnes(pairsMatrix) {
+		// Selected array is list of employee ids selected to Barbados.
+		var selected = [];
+		// Continue while matrix is not empty.
+		while (!isEmptyMatrix(pairsMatrix)) {
+			var maximum = 0;
+			var maximumArray = [];
+			for ( var i = 0; i < 1000; ++i) {
+				var max = Math.max(countRow(pairsMatrix, i), countColumn(
+						pairsMatrix, i));
+				if (max > maximum) {
+					maximum = max;
+					maximumArray = [];
+				}
+				if (countRow(pairsMatrix, i) == maximum) {
+					maximumArray.push(i + 1000);
+				}
+				if (countColumn(pairsMatrix, i) == maximum) {
+					maximumArray.push(i + 2000);
+				}
+			}
+
+			// Calculate number of intersections.
+			var maximumIntersections = 0;
+			for ( var i = 0; i < maximumArray.length; ) {
+				var intersections = 0;
+				for ( var j = 0; j < maximumArray.length; ++j) {
+					if (maximumArray[i] < 2000 && maximumArray[j] >= 2000) {
+						var row = maximumArray[i] - 1000;
+						var column = maximumArray[j] - 2000;
+						if (pairsMatrix[row][column] != 1) {
+							++intersections;
+						}
+					}
+					if (maximumArray[i] >= 2000 && maximumArray[j] < 2000) {
+						var row = maximumArray[j] - 1000;
+						var column = maximumArray[i] - 2000;
+						if (pairsMatrix[row][column] != 1) {
+							++intersections;
+						}
 					}
 				}
-				++i;
+				if (intersections > maximumIntersections) {
+					maximumArray.splice(0, i + 1);
+					maximumIntersections = intersections;
+				} else if (intersections == maximumIntersections) {
+					++i;
+				} else {
+					maximumArray.splice(i, 1);
+				}
 			}
-		}
-		// Remove employees whose partner count is zero.
-		for ( var i = 0; i < employees.length;) {
-			var employee = employees[i];
-			if (employee['partners'].length == 0) {
-				employees.splice(i, 1);
-			} else {
-				++i;
+
+			// Calculate number of Helsinki and New York employees.
+			var countHelsinki = 0;
+			var countNewYork = 0;
+			for ( var i = 0; i < maximumArray.length; ++i) {
+				if (maximumArray[i] < 2000) {
+					++countHelsinki;
+				} else {
+					++countNewYork;
+				}
 			}
+
+			// Choose pairs from the city where there are more participants in
+			// maximumArray.
+			for ( var i = 0; i < maximumArray.length; ++i) {
+				if (countHelsinki >= countNewYork && maximumArray[i] < 2000) {
+					clearRow(pairsMatrix, maximumArray[i] - 1000);
+					selected.push(maximumArray[i]);
+				} else if (countNewYork > countHelsinki
+						&& maximumArray[i] >= 2000) {
+					clearColumn(pairsMatrix, maximumArray[i] - 2000);
+					selected.push(maximumArray[i]);
+				}
+			}
+
 		}
+
+		return selected;
+	}
+
+	//
+	// Returns row count. Row count is value how many pairs Helsinki employee
+	// has in New York.
+	//
+	function countRow(pairsMatrix, row) {
+		return pairsMatrix[row][1000];
+	}
+
+	//
+	// Returns column count. Column count is value how many pairs New York
+	// employee has in Helsinki.
+	//
+	function countColumn(pairsMatrix, column) {
+		return pairsMatrix[1000][column];
+	}
+
+	//
+	// Clears row from matrix.
+	//
+	function clearRow(pairsMatrix, row) {
+		for ( var column = 0; column < 1000; ++column) {
+			if (pairsMatrix[row][column] == 1) {
+				--pairsMatrix[1000][column];
+			}
+			pairsMatrix[row][column] = 0;
+		}
+		pairsMatrix[row][1000] = 0;
+	}
+
+	//
+	// Clears column from matrix.
+	//
+	function clearColumn(pairsMatrix, column) {
+		for ( var row = 0; row < 1000; ++row) {
+			if (pairsMatrix[row][column] == 1) {
+				--pairsMatrix[row][1000];
+			}
+			pairsMatrix[row][column] = 0;
+		}
+		pairsMatrix[1000][column] = 0;
+	}
+
+	//
+	// Returns true if matrix is empty.
+	//
+	function isEmptyMatrix(pairsMatrix) {
+		var count = 0;
+		for ( var i = 0; i < 1000; ++i) {
+			count += countRow(pairsMatrix, i);
+		}
+		return count == 0;
 	}
 
 	//
@@ -167,6 +243,7 @@ define(function() {
 			}
 		}
 		client.open("GET", path, true);
+		client.setRequestHeader("Pragma", "no-cache");
 		client.send();
 	}
 
